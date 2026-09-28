@@ -13,8 +13,16 @@ import { renderMarkdown, escapeHtml, validatePost } from './content.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const hash = s => createHash('sha256').update(s).digest('hex');
 const equal = (a,b) => timingSafeEqual(Buffer.from(hash(a)), Buffer.from(hash(b)));
+// 子路径部署：BASE_PATH 规范化为「以 / 开头、结尾无 /」；'' 与 '/' 一律归一为空串（根路径部署）。
+export const normalizeBasePath = value => {
+  const raw = String(value ?? '').trim();
+  if (!raw || raw === '/') return '';
+  return `/${raw.replace(/^\/+/, '').replace(/\/+$/, '')}`;
+};
 export function createApp(options = {}) {
   const siteUrl = new URL(options.siteUrl || process.env.SITE_URL || 'http://localhost:3000').origin;
+  const base = normalizeBasePath(options.basePath ?? process.env.BASE_PATH);
+  const withBase = p => `${base}${String(p).startsWith('/') ? p : `/${p}`}`;
   const password = options.password || process.env.ADMIN_PASSWORD || '';
   if (password.length < 16) throw new Error('请先运行 npm run setup，或设置至少 16 位的 ADMIN_PASSWORD。');
   const dataDir = path.resolve(options.dataDir || process.env.DATA_DIR || path.join(root, 'data'));
@@ -25,17 +33,26 @@ export function createApp(options = {}) {
   app.set('view engine','ejs'); app.set('views',path.join(root,'views'));
   app.use(helmet({ contentSecurityPolicy:{ directives:{ 'default-src':["'self'"], 'script-src':["'self'"], 'style-src':["'self'"], 'img-src':["'self'",'https:','data:'], 'media-src':["'self'"], 'upgrade-insecure-requests':null }}, strictTransportSecurity:siteUrl.startsWith('https:') ? undefined : false }));
   app.use(express.json({limit:'1mb'}));
+  // 外层反向代理可能保留也可能剥掉 BASE_PATH；这里幂等地剥掉前缀，内部路由仍按根路径匹配。
+  if (base) app.use((req,_res,next) => {
+    const url = req.url;
+    if (url === base || url.startsWith(`${base}/`)) req.url = url.slice(base.length) || '/';
+    else if (url.startsWith(`${base}?`)) req.url = `/${url.slice(base.length)}`;
+    next();
+  });
   app.use('/assets',express.static(path.join(root,'public/assets'), {maxAge:'7d'}));
   app.use(express.static(path.join(root,'public'),{maxAge:0}));
   const uploads = path.join(dataDir,'uploads'); mkdirSync(uploads,{recursive:true});
   app.use('/uploads',express.static(uploads,{maxAge:'1y',immutable:true}));
   const audioPath = name => {
     const p = process.env[name] || '';
-    return /^\/audio\/[\w.-]+\.(ogg|wav|mp3)$/.test(p) && existsSync(path.join(root,'public',p)) ? p : '';
+    return /^\/audio\/[\w.-]+\.(ogg|wav|mp3)$/.test(p) && existsSync(path.join(root,'public',p)) ? withBase(p) : '';
   };
+  app.locals.base = base;
+  app.locals.withBase = withBase;
   app.locals.site = { url:siteUrl, owner:process.env.SITE_OWNER || 'OMEN', name:'AFTER SCHOOL', description:'记录代码、问题，以及把想法做出来的过程。', navigateAudio:audioPath('SFX_NAVIGATE'), confirmAudio:audioPath('SFX_CONFIRM') };
   app.locals.escapeHtml = escapeHtml;
-  app.locals.postUrl = p => `/journal/${p.slug}`;
+  app.locals.postUrl = p => withBase(`/journal/${p.slug}`);
   const render = (res, page, data={}) => res.render(page,{ title:'深蓝时刻', description:app.locals.site.description, canonical:'', section:'', ...data });
   const tokenFor = req => { try { return decodeURIComponent((req.headers.cookie || '').split(';').map(s=>s.trim()).find(s=>s.startsWith('as_session='))?.slice(11) || ''); } catch { return ''; } };
   const authenticated = req => {
@@ -70,9 +87,9 @@ export function createApp(options = {}) {
     store.db.prepare('DELETE FROM sessions WHERE expires<=?').run(Date.now());
     const token=randomBytes(32).toString('hex');
     store.db.prepare('INSERT INTO sessions VALUES (?,?)').run(hash(token),Date.now()+12*60*60*1000);
-    res.cookie('as_session',token,{httpOnly:true,secure:siteUrl.startsWith('https:'),sameSite:'strict',maxAge:12*60*60*1000,path:'/'}).json({ok:true});
+    res.cookie('as_session',token,{httpOnly:true,secure:siteUrl.startsWith('https:'),sameSite:'strict',maxAge:12*60*60*1000,path:base||'/'}).json({ok:true});
   });
-  app.post('/api/logout',origin,auth,(req,res)=>{store.db.prepare('DELETE FROM sessions WHERE hash=?').run(hash(tokenFor(req)));res.clearCookie('as_session',{path:'/'}).json({ok:true});});
+  app.post('/api/logout',origin,auth,(req,res)=>{store.db.prepare('DELETE FROM sessions WHERE hash=?').run(hash(tokenFor(req)));res.clearCookie('as_session',{path:base||'/'}).json({ok:true});});
   app.get('/api/admin/posts',auth,(_req,res)=>res.json(store.list(true)));
   app.get('/api/admin/export',auth,(_req,res)=>res.attachment('after-school-posts.json').json({version:1,posts:store.list(true)}));
   app.post('/api/admin/preview',origin,auth,(req,res)=>{
@@ -100,15 +117,15 @@ export function createApp(options = {}) {
       if(!['jpeg','png','webp','gif','avif'].includes(meta.format)) return res.status(400).json({error:'支持 JPG、PNG、WebP、GIF 和 AVIF 图片。'});
       const filename=`${randomBytes(16).toString('hex')}.webp`;
       await img.rotate().resize({width:2400,height:2400,fit:'inside',withoutEnlargement:true}).webp({quality:85}).toFile(path.join(uploads,filename));
-      res.status(201).json({url:`/uploads/${filename}`});
+      res.status(201).json({url:withBase(`/uploads/${filename}`)});
     }catch{return res.status(400).json({error:'图片无法读取，或尺寸超过限制。'});}
   });
   app.get('/feed.xml',(_req,res)=>{
-    const items=store.list().slice(0,30).map(p=>`<item><title>${escapeHtml(p.title)}</title><link>${siteUrl}/journal/${p.slug}</link><guid>${siteUrl}/journal/${p.slug}</guid><pubDate>${new Date(`${p.date}T00:00:00Z`).toUTCString()}</pubDate><description>${escapeHtml(p.excerpt)}</description></item>`).join('');
-    res.type('application/rss+xml').send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>AFTER SCHOOL · ${escapeHtml(app.locals.site.owner)}</title><link>${siteUrl}</link><description>${escapeHtml(app.locals.site.description)}</description>${items}</channel></rss>`);
+    const items=store.list().slice(0,30).map(p=>`<item><title>${escapeHtml(p.title)}</title><link>${siteUrl}${withBase(`/journal/${p.slug}`)}</link><guid>${siteUrl}${withBase(`/journal/${p.slug}`)}</guid><pubDate>${new Date(`${p.date}T00:00:00Z`).toUTCString()}</pubDate><description>${escapeHtml(p.excerpt)}</description></item>`).join('');
+    res.type('application/rss+xml').send(`<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"><channel><title>AFTER SCHOOL · ${escapeHtml(app.locals.site.owner)}</title><link>${siteUrl}${base}</link><description>${escapeHtml(app.locals.site.description)}</description>${items}</channel></rss>`);
   });
-  app.get('/sitemap.xml',(_req,res)=>res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/','/journal','/archive','/projects','/about',...store.list().map(p=>`/journal/${p.slug}`)].map(p=>`<url><loc>${escapeHtml(siteUrl+p)}</loc></url>`).join('')}</urlset>`));
-  app.get('/robots.txt',(_req,res)=>res.type('text').send(`User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nSitemap: ${siteUrl}/sitemap.xml\n`));
+  app.get('/sitemap.xml',(_req,res)=>res.type('application/xml').send(`<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${['/','/journal','/archive','/projects','/about',...store.list().map(p=>`/journal/${p.slug}`)].map(p=>`<url><loc>${escapeHtml(siteUrl+withBase(p))}</loc></url>`).join('')}</urlset>`));
+  app.get('/robots.txt',(_req,res)=>res.type('text').send(`User-agent: *\nAllow: ${withBase('/')}\nDisallow: ${withBase('/admin')}\nDisallow: ${withBase('/api/')}\nSitemap: ${siteUrl}${withBase('/sitemap.xml')}\n`));
   app.use('/api',(_req,res)=>res.status(404).json({error:'接口不存在。'}));
   app.use((_req,res)=>render(res.status(404),'page',{title:'这一页还没有被记录',kind:'404'}));
   app.use((err,req,res,_next)=>{

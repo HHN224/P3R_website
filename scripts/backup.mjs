@@ -1,0 +1,13 @@
+import { DatabaseSync, backup } from 'node:sqlite';
+import { mkdirSync, cpSync, existsSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+const data=path.resolve(process.env.DATA_DIR || './data');
+if(!existsSync(path.join(data,'blog.sqlite'))) throw new Error('尚无数据库，请先启动网站。');
+const destination=path.resolve('backups',new Date().toISOString().replace(/[:.]/g,'-'));
+mkdirSync(destination,{recursive:true});
+const db=new DatabaseSync(path.join(data,'blog.sqlite'));
+await backup(db,path.join(destination,'blog.sqlite'));
+if(existsSync(path.join(data,'uploads')))cpSync(path.join(data,'uploads'),path.join(destination,'uploads'),{recursive:true});
+db.close();
+writeFileSync(path.join(destination,'RESTORE.txt'),'停止网站后，将 blog.sqlite 与 uploads 复制到空的数据目录，保留 .env，然后重新启动。\n');
+console.log(`备份已保存：${destination}`);

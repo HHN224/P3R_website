@@ -1,0 +1,4 @@
+{$SITE_URL} {
+    encode zstd gzip
+    reverse_proxy blog:3000
+}

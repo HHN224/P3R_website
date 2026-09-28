@@ -1,0 +1,36 @@
+services:
+  blog:
+    build: .
+    restart: unless-stopped
+    environment:
+      SITE_URL: ${SITE_URL:?Set SITE_URL in .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
+      SITE_OWNER: ${SITE_OWNER:-OMEN}
+      TRUST_PROXY: '1'
+      SFX_NAVIGATE: ${SFX_NAVIGATE:-}
+      SFX_CONFIRM: ${SFX_CONFIRM:-}
+    volumes:
+      - blog_data:/app/data
+      - ./backups:/app/backups
+    expose:
+      - '3000'
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    environment:
+      SITE_URL: ${SITE_URL:?Set SITE_URL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      blog:
+        condition: service_healthy
+volumes:
+  blog_data:
+  caddy_data:
+  caddy_config:

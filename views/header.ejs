@@ -1,3 +1,3 @@
-<header class="site-header"><a class="identity" href="/" aria-label="After School 首页"><span class="identity-icon">AS<i>✦</i></span><span>AFTER<br>SCHOOL.</span></a>
-<nav class="top-nav" aria-label="主要导航"><% for(const [id,en,zh] of [['journal','JOURNAL','文章'],['archive','ARCHIVE','归档'],['projects','PROJECTS','作品'],['about','ABOUT','关于']]){ %><a href="/<%= id %>" <% if(section===id){ %>aria-current="page"<% } %>><%= zh %><span><%= en %></span></a><% } %></nav>
-<a class="subscribe" href="/feed.xml">RSS <span>↗</span></a></header>
+<header class="site-header"><a class="identity" href="<%= withBase('/') %>" aria-label="After School 首页"><span class="identity-icon">AS<i>✦</i></span><span>AFTER<br>SCHOOL.</span></a>
+<nav class="top-nav" aria-label="主要导航"><% for(const [id,en,zh] of [['journal','JOURNAL','文章'],['archive','ARCHIVE','归档'],['projects','PROJECTS','作品'],['about','ABOUT','关于']]){ %><a href="<%= withBase('/' + id) %>" <% if(section===id){ %>aria-current="page"<% } %>><%= zh %><span><%= en %></span></a><% } %></nav>
+<a class="subscribe" href="<%= withBase('/feed.xml') %>">RSS <span>↗</span></a></header>

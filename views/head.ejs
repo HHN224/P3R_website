@@ -1,8 +1,8 @@
 <!doctype html><html lang="zh-CN"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="theme-color" content="#073dc9">
 <title><%= title %> · AFTER SCHOOL</title><meta name="description" content="<%= description %>">
-<meta property="og:title" content="<%= title %> · AFTER SCHOOL"><meta property="og:description" content="<%= description %>"><meta property="og:image" content="<%= site.url %>/assets/p3r-poster.jpg"><meta property="og:type" content="<%= typeof post !== 'undefined' ? 'article' : 'website' %>">
-<% if(canonical){ %><link rel="canonical" href="<%= site.url + canonical %>"><meta property="og:url" content="<%= site.url + canonical %>"><% } %>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="AFTER SCHOOL" href="/feed.xml">
-<link rel="preload" href="/assets/barlow-bold.ttf" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="/style.css?v=1"><script src="/app.js?v=1" defer></script>
-</head><body class="<%= typeof home !== 'undefined' && home ? 'home' : 'interior' %>" data-navigate-audio="<%= site.navigateAudio %>" data-confirm-audio="<%= site.confirmAudio %>"><a class="skip-link" href="#main">跳到主要内容</a>
+<meta property="og:title" content="<%= title %> · AFTER SCHOOL"><meta property="og:description" content="<%= description %>"><meta property="og:image" content="<%= site.url + withBase('/assets/p3r-poster.jpg') %>"><meta property="og:type" content="<%= typeof post !== 'undefined' ? 'article' : 'website' %>">
+<% if(canonical){ %><link rel="canonical" href="<%= site.url + withBase(canonical) %>"><meta property="og:url" content="<%= site.url + withBase(canonical) %>"><% } %>
+<link rel="icon" href="<%= withBase('/favicon.svg') %>" type="image/svg+xml"><link rel="alternate" type="application/rss+xml" title="AFTER SCHOOL" href="<%= withBase('/feed.xml') %>">
+<link rel="preload" href="<%= withBase('/assets/barlow-bold.ttf') %>" as="font" type="font/ttf" crossorigin><link rel="stylesheet" href="<%= withBase('/style.css') %>?v=1"><script src="<%= withBase('/app.js') %>?v=1" defer></script>
+</head><body data-base="<%= base %>" class="<%= typeof home !== 'undefined' && home ? 'home' : 'interior' %>" data-navigate-audio="<%= site.navigateAudio %>" data-confirm-audio="<%= site.confirmAudio %>"><a class="skip-link" href="#main">跳到主要内容</a>

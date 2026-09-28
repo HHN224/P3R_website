@@ -1,6 +1,8 @@
 # 发布接口 v1
 
-同源后台使用这些 JSON 接口；也可通过脚本携带登录 cookie 调用。写请求必须发送和 `.env` 中 `SITE_URL` 完全一致的 `Origin`，不允许跨站调用，不设置宽泛的 CORS。API 路由返回 `Cache-Control: no-store`。
+同源后台使用这些 JSON 接口；也可通过脚本携带登录 cookie 调用。写请求必须发送和 `.env` 中 `SITE_URL` 完全一致的 `Origin`（`Origin` 不含路径，因此子路径部署下仍填 origin，不需要附带 `BASE_PATH`），不允许跨站调用，不设置宽泛的 CORS。API 路由返回 `Cache-Control: no-store`。
+
+设置 `BASE_PATH=/blog` 时，下表所有路径与上传返回的图片地址都带上该前缀（例如 `/blog/api/login`、`/blog/uploads/xxx.webp`），`BASE_PATH` 为空时保持根路径不变。会话 Cookie 的 `Path` 也随 `BASE_PATH` 变化。
 
 | 方法与路径 | 用途 |
 |---|---|

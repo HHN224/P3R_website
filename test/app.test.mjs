@@ -4,14 +4,14 @@ import { mkdtempSync, readFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
-import { createApp } from '../src/app.mjs';
+import { createApp, normalizeBasePath } from '../src/app.mjs';
 import { createStore } from '../src/store.mjs';
 import { renderMarkdown, importedPost } from '../src/content.mjs';
 
 test('文章导入、发布权限、持久化及公共输出', async t=>{
   const dir=mkdtempSync(path.join(tmpdir(),'after-school-test-'));
   const password='only-for-tests-long-password';
-  const {app,store}=createApp({dataDir:dir,password,siteUrl:'http://localhost:3000'});
+  const {app,store}=createApp({dataDir:dir,password,siteUrl:'http://localhost:3000',basePath:''});
   const server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));
   const base=`http://127.0.0.1:${server.address().port}`;
   let cookie='';
@@ -26,6 +26,10 @@ test('文章导入、发布权限、持久化及公共输出', async t=>{
       const found=await (await request('/journal?q=Bubblewrap')).text();assert.match(found,/agent-lite-day-4/);
       const absent=await (await request('/journal?q=definitely-no-results-123')).text();assert.match(absent,/NO ENTRIES FOUND/);
       assert.equal((await request('/journal/does-not-exist')).status,404);
+      assert.equal((await request('/blog/journal')).status,404,'未设置 BASE_PATH 时不应在 /blog 下提供服务');
+      const home=await (await request('/')).text();
+      assert.match(home,/data-base=""/);
+      for(const value of [...home.matchAll(/(?:href|src|action)="([^"]*)"/g)].map(m=>m[1])) assert.doesNotMatch(value,/^\/blog/);
       const range=await fetch(base+'/assets/p3r-background.mp4',{headers:{Range:'bytes=0-1023'}});assert.equal(range.status,206);assert.equal((await range.arrayBuffer()).byteLength,1024);
     });
     await t.test('写入与导出需要身份；跨站登录遭拒绝',async()=>{
@@ -73,4 +77,93 @@ test('文章导入、发布权限、持久化及公共输出', async t=>{
 test('Markdown 代码、重复标题目录与不可信 HTML',()=>{
   const r=renderMarkdown('## 标题\n\n## 标题\n\n```python\nprint("hello")\n```\n\n<img src=x onerror=alert(1)>');
   assert.equal(new Set(r.toc.map(h=>h.id)).size,2);assert.match(r.html,/hljs-/);assert.doesNotMatch(r.html,/<img src=x/);
+});
+test('BASE_PATH 规范化规则',()=>{
+  assert.equal(normalizeBasePath(undefined),'');
+  assert.equal(normalizeBasePath(null),'');
+  assert.equal(normalizeBasePath(''),'');
+  assert.equal(normalizeBasePath('/'),'');
+  assert.equal(normalizeBasePath('blog'),'/blog');
+  assert.equal(normalizeBasePath('/blog'),'/blog');
+  assert.equal(normalizeBasePath('/blog/'),'/blog');
+  assert.equal(normalizeBasePath('  /blog  '),'/blog');
+  assert.equal(normalizeBasePath('//blog//'),'/blog');
+  assert.equal(normalizeBasePath('/a/b/'),'/a/b');
+});
+test('子路径部署：BASE_PATH=/blog 下页面、资源、订阅与后台流程', async t=>{
+  const dir=mkdtempSync(path.join(tmpdir(),'after-school-base-test-'));
+  const password='only-for-tests-long-password';
+  const siteUrl='https://www.hhn224.site';
+  const {app,store}=createApp({dataDir:dir,password,siteUrl,basePath:'/blog'});
+  const server=app.listen(0,'127.0.0.1');await new Promise(resolve=>server.once('listening',resolve));
+  const origin=`http://127.0.0.1:${server.address().port}`;
+  let cookie='';
+  const request=(url,method='GET',body,requestOrigin=siteUrl,useCookie=true)=>fetch(origin+url,{method,headers:{...(useCookie&&cookie?{Cookie:cookie}:{}),...(method!=='GET'?{Origin:requestOrigin,'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+  try{
+    await t.test('/blog 下页面与静态资源可用；外层剥过前缀时同样可用',async()=>{
+      const urls=['/blog/','/blog/journal','/blog/archive','/blog/projects','/blog/about','/blog/credits','/blog/admin','/blog/feed.xml','/blog/sitemap.xml','/blog/robots.txt','/blog/style.css','/blog/app.js','/blog/admin.js','/blog/admin.css','/blog/favicon.svg','/blog/assets/barlow-bold.ttf','/blog/assets/barlow-black-italic.ttf','/blog/assets/p3r-poster.jpg','/blog/healthz','/healthz',...store.list().map(p=>`/blog/journal/${p.slug}`)];
+      for(const url of urls){const r=await request(url);assert.equal(r.status,200,url);}
+      const noSlash=await fetch(`${origin}/blog`,{redirect:'manual'});
+      assert.equal(noSlash.status,301,'不带结尾斜杠的 /blog 应重定向到 /blog/');
+      assert.equal(noSlash.headers.get('location'),'/blog/');
+      assert.equal((await fetch(`${origin}/blog`)).status,200);
+      const found=await (await request('/blog/journal?q=Bubblewrap')).text();assert.match(found,/agent-lite-day-4/);
+      assert.equal((await request('/journal')).status,200,'反向代理已剥掉前缀时仍按根路径路由');
+      assert.equal((await request('/blogger')).status,404,'前缀边界外的相似路径不应被改写');
+      assert.equal((await request('/blog/journal/does-not-exist')).status,404);
+      const range=await fetch(`${origin}/blog/assets/p3r-background.mp4`,{headers:{Range:'bytes=0-1023'}});assert.equal(range.status,206);assert.equal((await range.arrayBuffer()).byteLength,1024);
+    });
+    await t.test('页面内所有 href/src/action 均以 /blog 开头，canonical 带前缀',async()=>{
+      const pages=['/blog/','/blog/journal','/blog/archive','/blog/projects','/blog/about','/blog/credits','/blog/admin',...store.list().map(p=>`/blog/journal/${p.slug}`)];
+      for(const url of pages){
+        const html=await (await request(url)).text();
+        assert.match(html,/data-base="\/blog"/,url);
+        for(const value of [...html.matchAll(/(?:href|src|action)="([^"]*)"/g)].map(m=>m[1])){
+          if(value.startsWith('/')) assert.ok(value==='/blog'||value.startsWith('/blog/'),`${url} 出现未加前缀的根绝对路径 ${value}`);
+        }
+      }
+      const article=await (await request('/blog/journal/agent-lite-day-1')).text();
+      assert.match(article,/rel="canonical" href="https:\/\/www\.hhn224\.site\/blog\/journal\/agent-lite-day-1"/);
+      assert.match(article,/property="og:url" content="https:\/\/www\.hhn224\.site\/blog\/journal\/agent-lite-day-1"/);
+      const home=await (await request('/blog/')).text();
+      assert.match(home,/src="\/blog\/assets\/p3r-background\.mp4"/);
+      assert.match(home,/poster="\/blog\/assets\/p3r-poster\.jpg"/);
+    });
+    await t.test('RSS、sitemap、robots 使用 origin + /blog 且不重复前缀',async()=>{
+      const feed=await (await request('/blog/feed.xml')).text();
+      assert.match(feed,/<link>https:\/\/www\.hhn224\.site\/blog<\/link>/);
+      assert.match(feed,/<item><title>.*<\/title><link>https:\/\/www\.hhn224\.site\/blog\/journal\/agent-lite-day-1<\/link>/);
+      assert.doesNotMatch(feed,/blog\/blog/);
+      const map=await (await request('/blog/sitemap.xml')).text();
+      assert.match(map,/<loc>https:\/\/www\.hhn224\.site\/blog\/<\/loc>/);
+      assert.match(map,/<loc>https:\/\/www\.hhn224\.site\/blog\/journal<\/loc>/);
+      assert.doesNotMatch(map,/hhn224\.site\/journal/);
+      const robots=await (await request('/blog/robots.txt')).text();
+      assert.match(robots,/Disallow: \/blog\/admin/);
+      assert.match(robots,/Disallow: \/blog\/api\//);
+      assert.match(robots,/Sitemap: https:\/\/www\.hhn224\.site\/blog\/sitemap\.xml/);
+    });
+    await t.test('后台写入需要身份与同源 Origin；上传与发布结果带前缀',async()=>{
+      assert.equal((await request('/blog/api/admin/posts')).status,401);
+      assert.equal((await request('/blog/api/login','POST',{password},'https://evil.invalid')).status,403);
+      assert.equal((await request('/blog/api/login','POST',{password:'wrong'})).status,401);
+      const login=await request('/blog/api/login','POST',{password});assert.equal(login.status,200);
+      const setCookie=login.headers.get('set-cookie');
+      assert.match(setCookie,/Path=\/blog/);assert.match(setCookie,/HttpOnly/);
+      cookie=setCookie.split(';')[0];
+      assert.equal((await request('/blog/api/session')).status,200);
+      const p={slug:'blog-base-entry',title:'子路径下的新文章',markdown:'## 标题\n\n正文',date:'2026-09-22',category:'测试',tags:['测试'],series:'',day:0,excerpt:'摘要',status:'published'};
+      assert.equal((await request('/blog/api/admin/posts','POST',p)).status,201);
+      const page=await request('/blog/journal/blog-base-entry');assert.equal(page.status,200);
+      const buf=await sharp({create:{width:20,height:20,channels:3,background:'#084acc'}}).png().toBuffer();
+      const form=new FormData();form.append('file',new Blob([buf],{type:'image/png'}),'test.png');
+      const uploaded=await fetch(`${origin}/blog/api/admin/uploads`,{method:'POST',headers:{Cookie:cookie,Origin:siteUrl},body:form});
+      assert.equal(uploaded.status,201);const {url}=await uploaded.json();
+      assert.match(url,/^\/blog\/uploads\/[a-f0-9]{32}\.webp$/);
+      assert.equal((await fetch(origin+url)).status,200);
+      const logout=await request('/blog/api/logout','POST');assert.equal(logout.status,200);
+      assert.match(logout.headers.get('set-cookie'),/Path=\/blog/);
+      assert.equal((await request('/blog/api/admin/posts')).status,401);
+    });
+  }finally{await new Promise(resolve=>server.close(resolve));store.db.close();}
 });

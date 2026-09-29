@@ -2,6 +2,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import ejs from 'ejs';
+import { build as bundle } from 'esbuild';
 import { escapeHtml, minutes, renderMarkdown, validatePost } from '../src/content.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -43,7 +44,7 @@ function render(page, relative, data = {}) {
   const filename = path.join(root, 'views', `${page}.ejs`);
   const html = ejs.render(readFileSync(filename, 'utf8'), {
     title: '深蓝时刻', description: site.description, canonical: '', section: '',
-    site, base: '', withBase, postUrl, escapeHtml, ...data
+    site, base: '', withBase, postUrl, escapeHtml, analytics: true, ...data
   }, { filename });
   write(relative, html);
 }
@@ -51,6 +52,14 @@ function render(page, relative, data = {}) {
 rmSync(out, { recursive: true, force: true });
 cpSync(path.join(root, 'public'), out, { recursive: true });
 rmSync(path.join(out, 'admin.js'), { force: true });
+await bundle({
+  entryPoints: [path.join(root, 'src/analytics-client.mjs')],
+  outfile: path.join(out, 'analytics.js'),
+  bundle: true,
+  format: 'iife',
+  platform: 'browser',
+  minify: true
+});
 render('home', 'index.html', { canonical: '/', latest: posts[0], count: posts.length });
 render('journal', 'journal/index.html', {
   title: '文章手记', canonical: '/journal', section: 'journal', posts, all: posts,

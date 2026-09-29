@@ -3,9 +3,9 @@
     {
       "file": "BLOG_Day1_Agent_Runtime.md",
       "slug": "agent-lite-day-1",
-      "title": "从 150 行脚本到 Agent Runtime：复刻 pi-agent 的第一课",
+      "title": "让我的小 Agent 不再只是一次性脚本",
       "date": "2026-08-20",
-      "excerpt": "把一个 150 行的教学脚本拆成可复用、可单步、可中止的 Agent Runtime。",
+      "excerpt": "最初只有 150 行的编程助手，能跑却难维护。我把报错、超时和运行过程理顺，让它不再只能一次性使用。",
       "category": "Agent 工程",
       "tags": [
         "Python",
@@ -19,9 +19,9 @@
     {
       "file": "BLOG_Day2_UTF8_Bash_Bug.md",
       "slug": "agent-lite-day-2",
-      "title": "当 docker 的 UTF-8 撞上 Windows 的 GBK：一次\"卡死\"的 Agent 实战排查",
+      "title": "问它目录里有什么，它却试了十次也没答上来",
       "date": "2026-08-21",
-      "excerpt": "从 Windows 的 GBK 到容器里的 UTF-8，追踪一次让 Agent 耗尽轮数的编码问题。",
+      "excerpt": "一句“看看目录”，助手却连续试了十次。问题不是模型没听懂，而是 Windows 和 Linux 把同一段文字读成了不同的东西。",
       "category": "调试笔记",
       "tags": [
         "Python",
@@ -35,9 +35,9 @@
     {
       "file": "BLOG_Day3_Context_Anchor_Delta.md",
       "slug": "agent-lite-day-3",
-      "title": "当一个\"有锚点就够\"的上下文计量，悄悄漏掉了增长：一次自己发现问题、和 AI 对答案的排查",
+      "title": "对话快装不下了，助手却还说空间够用",
       "date": "2026-08-22",
-      "excerpt": "上下文窗口看似还有余量，计量却悄悄漏掉增长。一次关于锚点与增量的排查。",
+      "excerpt": "模型给出的占用量只记录上一次对话。我漏算了后来新增的内容，导致该整理旧对话时程序还说“空间足够”。",
       "category": "调试笔记",
       "tags": [
         "Python",
@@ -51,9 +51,9 @@
     {
       "file": "BLOG_Day4_WSL_Bubblewrap_Sandbox.md",
       "slug": "agent-lite-day-4",
-      "title": "WSL 明明运行在虚拟机里，为什么还护不住 C 盘：一次从错误安全假设到 Bubblewrap 落地的改造",
+      "title": "我以为把命令放进 WSL 就安全了",
       "date": "2026-09-09",
-      "excerpt": "重新理解 WSL 的安全边界，用 Bubblewrap 为工具建立真正的文件系统隔离。",
+      "excerpt": "我原以为命令进了 WSL 就碰不到 Windows 文件，后来才发现 C 盘仍在眼前。我给每次命令划了更小的活动范围。",
       "category": "沙箱与工具",
       "tags": [
         "Python",
@@ -67,9 +67,9 @@
     {
       "file": "BLOG_Day5_Esc_Cancel_Broken_History.md",
       "slug": "agent-lite-day-5",
-      "title": "按下 Esc 之后，我的 Agent 就\"失忆\"了：一次关于「取消」的排查",
+      "title": "按下 Esc 后，下一句话为什么发不出去？",
       "date": "2026-09-15",
-      "excerpt": "一次 Esc 取消打断了消息历史：让中止操作与完整的对话状态和平共处。",
+      "excerpt": "Esc 让助手停下了，却留下两次没有结果的工具调用。下一句话因此被拒绝，我重新处理了取消后的对话记录。",
       "category": "调试笔记",
       "tags": [
         "Python",
@@ -83,9 +83,9 @@
     {
       "file": "BLOG_Day6_Tell_Model_Its_Sandbox.md",
       "slug": "agent-lite-day-6",
-      "title": "沙箱里没有网络，可模型不知道：一次把「处境」写进工具的改造",
+      "title": "我关掉了网络，却忘了告诉 Agent",
       "date": "2026-09-15",
-      "excerpt": "把已知的环境约束告诉模型，让它少一点盲目试错，多一点有效行动。",
+      "excerpt": "我把命令关进无网络的环境，却只把规则打印给自己看。助手不知道限制，于是反复尝试根本做不到的事。",
       "category": "沙箱与工具",
       "tags": [
         "Python",

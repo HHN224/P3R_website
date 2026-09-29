@@ -29,12 +29,12 @@ export function importedPost(filename, source) {
   const date = source.match(/日期：(\d{4}-\d{2}-\d{2})/)?.[1] || '2026-01-01';
   const markdown = source.replace(/^# .+\r?\n+/, '');
   const descriptions = [
-    '', '把一个 150 行的教学脚本拆成可复用、可单步、可中止的 Agent Runtime。',
-    '从 Windows 的 GBK 到容器里的 UTF-8，追踪一次让 Agent 耗尽轮数的编码问题。',
-    '上下文窗口看似还有余量，计量却悄悄漏掉增长。一次关于锚点与增量的排查。',
-    '重新理解 WSL 的安全边界，用 Bubblewrap 为工具建立真正的文件系统隔离。',
-    '一次 Esc 取消打断了消息历史：让中止操作与完整的对话状态和平共处。',
-    '把已知的环境约束告诉模型，让它少一点盲目试错，多一点有效行动。'
+    '', '最初只有 150 行的编程助手，能跑却难维护。我把报错、超时和运行过程理顺，让它不再只能一次性使用。',
+    '一句“看看目录”，助手却连续试了十次。问题不是模型没听懂，而是 Windows 和 Linux 把同一段文字读成了不同的东西。',
+    '模型给出的占用量只记录上一次对话。我漏算了后来新增的内容，导致该整理旧对话时程序还说“空间足够”。',
+    '我原以为命令进了 WSL 就碰不到 Windows 文件，后来才发现 C 盘仍在眼前。我给每次命令划了更小的活动范围。',
+    'Esc 让助手停下了，却留下两次没有结果的工具调用。下一句话因此被拒绝，我重新处理了取消后的对话记录。',
+    '我把命令关进无网络的环境，却只把规则打印给自己看。助手不知道限制，于是反复尝试根本做不到的事。'
   ];
   return { slug: `agent-lite-day-${day}`, title, date, markdown, excerpt: descriptions[day] || plainText(markdown).slice(0, 140), category: [4,6].includes(day) ? '沙箱与工具' : [2,3,5].includes(day) ? '调试笔记' : 'Agent 工程', tags: ['Python','Agent', ...([4,6].includes(day) ? ['Sandbox'] : ['Runtime'])], series: '构建自己的 Agent', day, status: 'published' };
 }

@@ -4,3 +4,5 @@ data/
 backups/
 qa/
 *.log
+dist/
+.vercel/

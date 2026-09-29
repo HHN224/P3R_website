@@ -7,3 +7,4 @@
 @media(max-width:370px){.menu-word{font-size:52px}.menu-zh{font-size:10px;margin-left:7px}.menu-item{min-height:73px}.home-tools{gap:9px}.top-nav{gap:12px}.site-header{padding:0 16px}.page-container{padding-left:18px;padding-right:18px}.page-heading h1{font-size:55px}}
 @media(prefers-reduced-motion:reduce){:root{scroll-behavior:auto}*,*:before,*:after{animation:none!important;transition:none!important}}
 @media(max-width:700px){.article-aside{width:100%}.article-aside .toc{padding-bottom:2px}}
+[hidden]{display:none!important}

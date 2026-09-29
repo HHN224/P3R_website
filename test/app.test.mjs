@@ -19,7 +19,7 @@ test('文章导入、发布权限、持久化及公共输出', async t=>{
   try{
     await t.test('完整导入六篇，原日期正文不丢失',()=>{
       assert.equal(store.list().length,6);
-      for(const filename of readdirSync('content')){const source=readFileSync(path.join('content',filename),'utf8');const p=importedPost(filename,source);assert.equal(store.get(p.slug).markdown,p.markdown);assert.equal(store.get(p.slug).date,p.date);}
+      for(const filename of readdirSync('content').filter(name=>name.endsWith('.md'))){const source=readFileSync(path.join('content',filename),'utf8');const p=importedPost(filename,source);assert.equal(store.get(p.slug).markdown,p.markdown);assert.equal(store.get(p.slug).date,p.date);}
     });
     await t.test('所有公开页面、搜索、订阅与真实 404',async()=>{
       for(const url of ['/','/journal','/archive','/projects','/about','/credits','/admin','/feed.xml','/sitemap.xml','/robots.txt',...store.list().map(p=>`/journal/${p.slug}`)]){const r=await request(url);assert.equal(r.status,200,url);}

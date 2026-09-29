@@ -64,7 +64,7 @@ export function createApp(options = {}) {
   app.use('/api', (_req,res,next) => { res.set('Cache-Control','no-store'); next(); });
   app.use('/api',rateLimit({windowMs:60*1000,limit:120,standardHeaders:'draft-8',legacyHeaders:false}));
   app.get('/healthz',(_req,res)=>{store.db.prepare('SELECT 1').get();res.json({status:'ok'});});
-  app.get('/',(_req,res)=>render(res,'home',{canonical:'/',latest:store.list()[0],count:store.list().length}));
+  app.get('/',(_req,res)=>{const posts=store.list();render(res,'home',{canonical:'/',latest:posts[0],count:posts.length,posts});});
   app.get('/journal',(req,res)=>{
     const all=store.list();
     const q=String(req.query.q || '').slice(0,200), category=String(req.query.category||''),tag=String(req.query.tag||''),series=String(req.query.series||'');
@@ -76,7 +76,7 @@ export function createApp(options = {}) {
     const peers=store.list().filter(p=>p.series && p.series===post.series).sort((a,b)=>a.day-b.day);
     render(res,'article',{title:post.title,description:post.excerpt,canonical:`/journal/${post.slug}`,section:'journal',post,...renderMarkdown(post.markdown),peers});
   });
-  app.get('/archive',(_req,res)=>render(res,'archive',{title:'时间归档',canonical:'/archive',section:'archive',posts:store.list()}));
+  app.get('/archive',(_req,res)=>render(res,'archive',{title:'时间轴',canonical:'/archive',section:'archive',posts:store.list()}));
   app.get('/projects',(_req,res)=>render(res,'page',{title:'作品与实验',canonical:'/projects',section:'projects',kind:'projects'}));
   app.get('/about',(_req,res)=>render(res,'page',{title:'关于这里',canonical:'/about',section:'about',kind:'about'}));
   app.get('/credits',(_req,res)=>render(res,'page',{title:'素材与参考',canonical:'/credits',kind:'credits'}));

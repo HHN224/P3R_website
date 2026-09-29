@@ -60,7 +60,7 @@ await bundle({
   platform: 'browser',
   minify: true
 });
-render('home', 'index.html', { canonical: '/', latest: posts[0], count: posts.length });
+render('home', 'index.html', { canonical: '/', latest: posts[0], count: posts.length, posts });
 render('journal', 'journal/index.html', {
   title: '文章手记', canonical: '/journal', section: 'journal', posts, all: posts,
   categories: [...new Set(posts.map(p => p.category))], q: '', category: '', tag: '', series: '', staticJournal: true
@@ -72,7 +72,7 @@ for (const post of posts) {
     post, ...renderMarkdown(post.markdown), peers
   });
 }
-render('archive', 'archive.html', { title: '时间归档', canonical: '/archive', section: 'archive', posts });
+render('archive', 'archive.html', { title: '时间轴', canonical: '/archive', section: 'archive', posts });
 for (const [route, title, kind, section] of [
   ['projects', '作品与实验', 'projects', 'projects'],
   ['about', '关于这里', 'about', 'about'],

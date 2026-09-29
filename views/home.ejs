@@ -1,11 +1,28 @@
 <%- include('head',{home:true}) %>
-<main class="stage" id="main"><video class="water-video" src="<%= withBase('/assets/p3r-background.mp4') %>" poster="<%= withBase('/assets/p3r-poster.jpg') %>" muted loop playsinline preload="none" aria-hidden="true"></video><div class="water-shade" aria-hidden="true"></div>
-<header class="home-header"><a class="identity" href="<%= withBase('/') %>" aria-label="After School 首页"><span class="identity-icon">AS<i>✦</i></span><span>AFTER<br>SCHOOL.</span></a><div class="home-tools"><button id="motion" aria-pressed="true">Ⅱ 动态背景</button><button id="sound" aria-pressed="false">♪ 音效关闭</button><a href="<%= withBase('/feed.xml') %>">RSS ↗</a></div></header>
-<div class="date-stamp"><strong id="today">9/22</strong><div><b id="weekday">TUE</b><small>AFTER SCHOOL</small></div><span>◐</span></div>
-<div class="section-index"><span>PERSONAL LOG</span><b id="selected-number">01</b></div>
-<div class="home-menu-wrap"><p class="eyebrow">THE DAYS WE LEAVE BEHIND</p><h1 class="sr-only">AFTER SCHOOL · <%= site.owner %> 的个人博客</h1><nav class="home-menu" aria-label="博客导航">
-<% for(const [index,en,zh,url,description] of [[1,'JOURNAL','文章','journal','记录代码，也记录思考的过程。'],[2,'ARCHIVE','归档','archive','沿着时间，找回每一段思考。'],[3,'PROJECTS','作品','projects','把脑海里的想法，变成现实。'],[4,'ABOUT','关于','about','屏幕之后，故事还在继续。']]){ %>
-<a class="menu-item <%= index===1?'active':'' %>" href="<%= withBase('/' + url) %>" data-menu="<%= index-1 %>" data-description="<%= description %>"><span class="menu-number">0<%= index %></span><span class="menu-word"><%= en %></span><span class="menu-zh"><%= zh %></span><span class="menu-arrow">↗</span></a><% } %></nav></div>
-<% if(latest){ %><a class="latest-memory" href="<%= postUrl(latest) %>"><span class="micro">LATEST MEMORY <b><%= latest.date.replaceAll('-','.') %></b></span><strong><%= latest.title.split('：')[0] %></strong><span class="micro"><span><%= latest.category %><% if(latest.series){ %> / DAY <%= String(latest.day).padStart(2,'0') %><% } %></span><b>READ ENTRY ↗</b></span></a><% } %>
-<div class="home-command"><span>Read the latest stories</span><div><small>Command</small><i></i></div><p id="menu-description">记录代码，也记录思考的过程。</p></div>
-<footer class="home-footer"><div><p class="key-hints"><kbd>↑</kbd><kbd>↓</kbd> 选择 <kbd>ENTER</kbd> 确认</p><span><%= site.owner %>'S JOURNAL <b>✦</b> EST. 2026</span></div><a href="<%= withBase('/journal') %>"><%= String(count).padStart(2,'0') %> ENTRIES / 进入文章列表 ↗</a><a href="<%= withBase('/credits') %>">素材来源 ↗</a></footer></main><div id="toast" role="status" aria-live="polite"></div></body></html>
+<main class="home-main" id="main">
+  <section class="stage" id="home-stage" aria-label="首页导航">
+    <video class="water-video" src="<%= withBase('/assets/p3r-background.mp4') %>" poster="<%= withBase('/assets/p3r-poster.jpg') %>" muted loop playsinline preload="none" aria-hidden="true"></video>
+    <div class="water-shade" aria-hidden="true"></div>
+    <div class="scene-wash" aria-hidden="true"></div>
+    <div class="home-scene-content">
+      <header class="home-header"><a class="identity" href="<%= withBase('/') %>" aria-label="After School 首页"><span class="identity-icon">AS<i>✦</i></span><span>AFTER<br>SCHOOL.</span></a><div class="home-tools"><button id="motion" aria-pressed="true">Ⅱ 动态背景</button><button id="sound" aria-pressed="false">♪ 音效关闭</button><a href="<%= withBase('/feed.xml') %>">RSS ↗</a></div></header>
+      <div class="date-stamp"><strong id="today">9/22</strong><div><b id="weekday">TUE</b><small>AFTER SCHOOL</small></div><span>◐</span></div>
+      <div class="section-index"><span>PERSONAL LOG</span><b id="selected-number">01</b></div>
+      <div class="home-menu-wrap"><p class="eyebrow">THE DAYS WE LEAVE BEHIND</p><h1 class="sr-only">AFTER SCHOOL · <%= site.owner %> 的个人博客</h1><nav class="home-menu" aria-label="博客导航">
+        <% for(const [index,en,zh,url,description] of [[1,'JOURNAL','文章','journal','记录代码，也记录思考的过程。'],[2,'TIMELINE','时间轴','archive','沿着时间，找回每一段思考。'],[3,'PROJECTS','作品','projects','把脑海里的想法，变成现实。'],[4,'ABOUT','关于','about','屏幕之后，故事还在继续。']]){ %>
+        <a class="menu-item <%= index===1?'active':'' %>" href="<%= withBase('/' + url) %>" data-menu="<%= index-1 %>" data-description="<%= description %>"><span class="menu-number">0<%= index %></span><span class="menu-word"><%= en %></span><span class="menu-zh"><%= zh %></span><span class="menu-arrow">↗</span></a><% } %>
+      </nav></div>
+      <% if(latest){ %><a class="latest-memory" href="<%= postUrl(latest) %>"><span class="micro">LATEST MEMORY <b><%= latest.date.replaceAll('-','.') %></b></span><strong><%= latest.title.split('：')[0] %></strong><span class="micro"><span><%= latest.category %><% if(latest.series){ %> / DAY <%= String(latest.day).padStart(2,'0') %><% } %></span><b>READ ENTRY ↗</b></span></a><% } %>
+      <div class="home-command"><span>Read the latest stories</span><div><small>Command</small><i></i></div><p id="menu-description">记录代码，也记录思考的过程。</p></div>
+      <a class="home-scroll-cue" href="#home-journal"><span class="home-scroll-cue-icon" aria-hidden="true">↓</span><span><strong>向下滚动，查看全部文章</strong><small>SCROLL TO ALL <%= String(count).padStart(2,'0') %> ENTRIES</small></span></a>
+      <footer class="home-footer"><div><p class="key-hints"><kbd>↑</kbd><kbd>↓</kbd> 选择 <kbd>ENTER</kbd> 确认</p><span><%= site.owner %>'S JOURNAL <b>✦</b> EST. 2026</span></div><a href="<%= withBase('/credits') %>">素材来源 ↗</a></footer>
+    </div>
+  </section>
+  <section class="home-journal" id="home-journal" aria-labelledby="home-journal-title">
+    <div class="home-journal-inner">
+      <div class="home-journal-heading"><div><p class="eyebrow">THE STORY CONTINUES / <%= String(count).padStart(2,'0') %> ENTRIES</p><h2 id="home-journal-title">JOURNAL<span>全部文章</span></h2><p>继续向下，看看我最近在做什么、遇到了什么，又是怎么一步步解决的。</p></div><a class="button outline" href="<%= withBase('/journal') %>">搜索与筛选文章 ↗</a></div>
+      <%- include('post-list') %>
+      <div class="home-journal-end"><span>YOU'RE ALL CAUGHT UP ✦</span><a href="#home-stage">↑ 回到首页</a></div>
+    </div>
+  </section>
+</main><div id="toast" role="status" aria-live="polite"></div></body></html>

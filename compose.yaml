@@ -5,7 +5,7 @@ services:
     environment:
       SITE_URL: ${SITE_URL:?Set SITE_URL in .env}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?Set ADMIN_PASSWORD in .env}
-      SITE_OWNER: ${SITE_OWNER:-OMEN}
+      SITE_OWNER: ${SITE_OWNER:-HHN224}
       TRUST_PROXY: '1'
       SFX_NAVIGATE: ${SFX_NAVIGATE:-}
       SFX_CONFIRM: ${SFX_CONFIRM:-}

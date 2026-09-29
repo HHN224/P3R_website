@@ -23,7 +23,7 @@ const configuredUrl = process.env.SITE_URL || (vercelHost ? `https://${vercelHos
 const siteUrl = new URL(configuredUrl).origin;
 const site = {
   url: siteUrl,
-  owner: process.env.SITE_OWNER || 'OMEN',
+  owner: process.env.SITE_OWNER || 'HHN224',
   name: 'AFTER SCHOOL',
   description: '记录代码、问题，以及把想法做出来的过程。',
   navigateAudio: audioPath('SFX_NAVIGATE'),

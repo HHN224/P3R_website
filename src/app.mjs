@@ -50,7 +50,7 @@ export function createApp(options = {}) {
   };
   app.locals.base = base;
   app.locals.withBase = withBase;
-  app.locals.site = { url:siteUrl, owner:process.env.SITE_OWNER || 'OMEN', name:'AFTER SCHOOL', description:'记录代码、问题，以及把想法做出来的过程。', navigateAudio:audioPath('SFX_NAVIGATE'), confirmAudio:audioPath('SFX_CONFIRM') };
+  app.locals.site = { url:siteUrl, owner:process.env.SITE_OWNER || 'HHN224', name:'AFTER SCHOOL', description:'记录代码、问题，以及把想法做出来的过程。', navigateAudio:audioPath('SFX_NAVIGATE'), confirmAudio:audioPath('SFX_CONFIRM') };
   app.locals.escapeHtml = escapeHtml;
   app.locals.postUrl = p => withBase(`/journal/${p.slug}`);
   const render = (res, page, data={}) => res.render(page,{ title:'深蓝时刻', description:app.locals.site.description, canonical:'', section:'', ...data });

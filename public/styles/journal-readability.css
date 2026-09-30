@@ -1,1 +1,7 @@
-/* Independently reversible page refinement. */
+/* Give summaries and topic links a comfortable reading size. */
+.post-copy>p{font-size:14px;line-height:1.95;max-width:62ch}
+.post-tags{font-size:12px;line-height:1.7;gap:12px}
+.post-tags a{display:inline-flex;align-items:center;min-height:28px}
+@media(max-width:700px){
+  .post-copy>p{font-size:14px;line-height:1.9}
+}

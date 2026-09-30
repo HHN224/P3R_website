@@ -1,1 +1,34 @@
-/* Independently reversible page refinement. */
+/* Keep small text readable as the video moves underneath it. */
+.home-tools{gap:4px;padding:4px;background:#f5f8fce8;border:1px solid #ffffffb3;color:#042674;box-shadow:3px 3px 0 #0426741a}
+.home-tools button,.home-tools a{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 12px;font-size:12px}
+.home-tools button:hover,.home-tools a:hover{background:#dceeff}
+.home-intro{padding:10px 14px;background:#f5f8fce8;border-left:3px solid #084acc}
+.latest-memory{display:block;padding:16px 18px;background:#041c68e8;border-left:3px solid var(--cyan);box-shadow:5px 5px 0 #03145033}
+.latest-memory>.micro{color:#bffffb}
+.latest-memory strong{color:white}
+@media(max-width:700px){
+  .stage{height:auto;min-height:100svh}
+  .home-scene-content{position:relative;inset:auto;min-height:100svh;padding-top:285px;padding-bottom:24px}
+  .home-menu-wrap{position:relative;top:auto;left:auto;margin:0 4% 32px 16%}
+  .home-header{left:5%;right:5%}
+  .home-tools{gap:0;padding:2px}
+  .home-tools button,.home-tools a{min-height:44px;padding:0 7px;font-size:10px}
+  .home-intro{padding:6px 10px}
+  .latest-memory{position:relative;top:auto;right:auto;margin:0 6% 24px 10%;padding:13px 14px;width:84%;max-width:none}
+  .home-scroll-cue{position:relative;left:auto;bottom:auto;margin:0 6% 32px;width:max-content}
+  .home-footer{position:relative;left:auto;right:auto;bottom:auto;margin:0 6%}
+}
+@media(max-width:370px){
+  .home-tools button,.home-tools a{padding:0 5px}
+}
+
+/* Keep the latest entry clear of the menu at tablet widths. */
+@media(min-width:701px) and (max-width:1100px){
+  .stage{height:auto;min-height:100svh}
+  .home-scene-content{position:relative;inset:auto;min-height:100svh;padding-top:300px;padding-bottom:32px}
+  .home-menu-wrap{position:relative;top:auto;left:auto;width:72%;margin:0 12% 42px 16%}
+  .latest-memory{position:relative;top:auto;right:auto;width:360px;max-width:86%;margin:0 4.5% 24px auto}
+  .home-command{display:none}
+  .home-scroll-cue{position:relative;left:auto;bottom:auto;margin:0 4.5% 32px;width:max-content;max-width:86%}
+  .home-footer{position:relative;left:auto;right:auto;bottom:auto;margin:0 4.5%}
+}

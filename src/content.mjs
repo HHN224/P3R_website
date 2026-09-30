@@ -34,9 +34,10 @@ export function importedPost(filename, source) {
     '模型给出的占用量只记录上一次对话。我漏算了后来新增的内容，导致该整理旧对话时程序还说“空间足够”。',
     '我原以为命令进了 WSL 就碰不到 Windows 文件，后来才发现 C 盘仍在眼前。我给每次命令划了更小的活动范围。',
     'Esc 让助手停下了，却留下两次没有结果的工具调用。下一句话因此被拒绝，我重新处理了取消后的对话记录。',
-    '我把命令关进无网络的环境，却只把规则打印给自己看。助手不知道限制，于是反复尝试根本做不到的事。'
+    '我把命令关进无网络的环境，却只把规则打印给自己看。助手不知道限制，于是反复尝试根本做不到的事。',
+    '模型处理了十几秒，摘要却一个字也没有。我把目标长度当成了 API 硬上限，忘了给正文之前的推理留出额度。'
   ];
-  return { slug: `agent-lite-day-${day}`, title, date, markdown, excerpt: descriptions[day] || plainText(markdown).slice(0, 140), category: [4,6].includes(day) ? '沙箱与工具' : [2,3,5].includes(day) ? '调试笔记' : 'Agent 工程', tags: ['Python','Agent', ...([4,6].includes(day) ? ['Sandbox'] : ['Runtime'])], series: '构建自己的 Agent', day, status: 'published' };
+  return { slug: `agent-lite-day-${day}`, title, date, markdown, excerpt: descriptions[day] || plainText(markdown).slice(0, 140), category: [4,6].includes(day) ? '沙箱与工具' : [2,3,5,7].includes(day) ? '调试笔记' : 'Agent 工程', tags: ['Python','Agent', ...([4,6].includes(day) ? ['Sandbox'] : ['Runtime'])], series: '构建自己的 Agent', day, status: 'published' };
 }
 export function validatePost(input) {
   const strings = ['slug','title','date','markdown','excerpt','category','series','status'];

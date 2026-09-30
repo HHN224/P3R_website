@@ -95,6 +95,22 @@
       "series": "构建自己的 Agent",
       "day": 6,
       "status": "published"
+    },
+    {
+      "file": "BLOG_Day7_Reasoning_Output_Budget.md",
+      "slug": "agent-lite-day-7",
+      "title": "模型一直在思考，为什么压缩摘要还是空的？",
+      "date": "2026-09-30",
+      "excerpt": "模型处理了十几秒，摘要却一个字也没有。我把目标长度当成了 API 硬上限，忘了给正文之前的推理留出额度。",
+      "category": "调试笔记",
+      "tags": [
+        "Python",
+        "Agent",
+        "Runtime"
+      ],
+      "series": "构建自己的 Agent",
+      "day": 7,
+      "status": "published"
     }
   ]
 }

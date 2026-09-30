@@ -8,6 +8,8 @@ import { createApp, normalizeBasePath } from '../src/app.mjs';
 import { createStore } from '../src/store.mjs';
 import { renderMarkdown, importedPost } from '../src/content.mjs';
 
+const seedPosts = JSON.parse(readFileSync('content/posts.json', 'utf8')).posts;
+
 test('文章导入、发布权限、持久化及公共输出', async t=>{
   const dir=mkdtempSync(path.join(tmpdir(),'after-school-test-'));
   const password='only-for-tests-long-password';
@@ -17,9 +19,13 @@ test('文章导入、发布权限、持久化及公共输出', async t=>{
   let cookie='';
   const request=(url,method='GET',body,origin='http://localhost:3000',useCookie=true)=>fetch(base+url,{method,headers:{...(useCookie&&cookie?{Cookie:cookie}:{}),...(method!=='GET'?{Origin:origin,'Content-Type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
   try{
-    await t.test('完整导入六篇，原日期正文不丢失',()=>{
-      assert.equal(store.list().length,6);
+    await t.test('完整导入文章，日期正文与发布清单一致',()=>{
+      assert.equal(store.list().length,seedPosts.length);
       for(const filename of readdirSync('content').filter(name=>name.endsWith('.md'))){const source=readFileSync(path.join('content',filename),'utf8');const p=importedPost(filename,source);assert.equal(store.get(p.slug).markdown,p.markdown);assert.equal(store.get(p.slug).date,p.date);}
+      for (const {file, ...metadata} of seedPosts) {
+        const seeded=store.get(metadata.slug);
+        for (const [key,value] of Object.entries(metadata)) assert.deepEqual(seeded[key],value,`${file}: ${key}`);
+      }
     });
     await t.test('所有公开页面、搜索、订阅与真实 404',async()=>{
       for(const url of ['/','/journal','/archive','/projects','/about','/credits','/admin','/feed.xml','/sitemap.xml','/robots.txt',...store.list().map(p=>`/journal/${p.slug}`)]){const r=await request(url);assert.equal(r.status,200,url);}
@@ -67,12 +73,12 @@ test('文章导入、发布权限、持久化及公共输出', async t=>{
     await t.test('撤稿、导出及注销立即生效',async()=>{
       const r=await request('/api/admin/posts/test-new-entry','PUT',{...p,status:'draft'});assert.equal(r.status,200);
       assert.equal((await request('/journal/test-new-entry')).status,404);
-      const exported=await(await request('/api/admin/export')).json();assert.equal(exported.posts.length,7);
+      const exported=await(await request('/api/admin/export')).json();assert.equal(exported.posts.length,seedPosts.length+1);
       assert.equal((await request('/api/logout','POST')).status,200);assert.equal((await request('/api/admin/posts')).status,401);
     });
   }finally{await new Promise(resolve=>server.close(resolve));store.db.close();}
   const reopened=createStore(dir,path.resolve('content'));
-  assert.equal(reopened.list(true).length,7);assert.equal(reopened.get('test-new-entry').status,'draft');assert.equal(reopened.list().length,6);reopened.db.close();
+  assert.equal(reopened.list(true).length,seedPosts.length+1);assert.equal(reopened.get('test-new-entry').status,'draft');assert.equal(reopened.list().length,seedPosts.length);reopened.db.close();
 });
 test('Markdown 代码、重复标题目录与不可信 HTML',()=>{
   const r=renderMarkdown('## 标题\n\n## 标题\n\n```python\nprint("hello")\n```\n\n<img src=x onerror=alert(1)>');

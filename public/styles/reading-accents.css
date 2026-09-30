@@ -1,1 +1,9 @@
-/* Independently reversible page refinement. */
+/* Echo the home menu with small cyan cuts in the reading pages. */
+.prose h2{position:relative;padding-left:20px}
+.prose h2::before{content:'';position:absolute;left:1px;top:.32em;width:6px;height:.95em;background:#16bfcf;transform:skew(-12deg)}
+.filters a{position:relative}
+.filters a.active{background:linear-gradient(135deg,transparent 8px,var(--blue) 0) top right/14px 14px no-repeat,var(--blue)}
+.filters a.active::after{content:'';position:absolute;right:0;top:0;width:10px;height:10px;background:var(--cyan);clip-path:polygon(0 0,100% 0,100% 100%)}
+.article-pagination a{position:relative;border-top:2px solid var(--blue);background:#ffffff99;transition:background .2s,transform .2s}
+.article-pagination a::after{content:'';position:absolute;right:0;top:0;width:18px;height:18px;background:var(--cyan);clip-path:polygon(0 0,100% 0,100% 100%)}
+.article-pagination a:hover{background:#eaf1fc;transform:translateY(-3px)}

@@ -6,9 +6,10 @@
     <div class="scene-wash" aria-hidden="true"></div>
     <div class="home-scene-content">
       <header class="home-header"><a class="identity" href="<%= withBase('/') %>" aria-label="After School 首页"><span class="identity-icon">AS<i>✦</i></span><span>AFTER<br>SCHOOL.</span></a><div class="home-tools"><button id="motion" aria-pressed="true">Ⅱ 动态背景</button><button id="sound" aria-pressed="false">♪ 音效关闭</button><a href="<%= withBase('/feed.xml') %>">RSS ↗</a></div></header>
+      <div class="home-intro"><h1><%= site.owner %> 的开发手记</h1><p>Agent、代码与踩坑记录</p></div>
       <div class="date-stamp"><strong id="today">9/22</strong><div><b id="weekday">TUE</b><small>AFTER SCHOOL</small></div><span>◐</span></div>
       <div class="section-index"><span>PERSONAL LOG</span><b id="selected-number">01</b></div>
-      <div class="home-menu-wrap"><p class="eyebrow">THE DAYS WE LEAVE BEHIND</p><h1 class="sr-only">AFTER SCHOOL · <%= site.owner %> 的个人博客</h1><nav class="home-menu" aria-label="博客导航">
+      <div class="home-menu-wrap"><p class="eyebrow">THE DAYS WE LEAVE BEHIND</p><nav class="home-menu" aria-label="博客导航">
         <% for(const [index,en,zh,url,description] of [[1,'JOURNAL','文章','journal','记录代码，也记录思考的过程。'],[2,'TIMELINE','时间轴','archive','沿着时间，找回每一段思考。'],[3,'PROJECTS','作品','projects','把脑海里的想法，变成现实。'],[4,'ABOUT','关于','about','屏幕之后，故事还在继续。']]){ %>
         <a class="menu-item <%= index===1?'active':'' %>" href="<%= withBase('/' + url) %>" data-menu="<%= index-1 %>" data-description="<%= description %>"><span class="menu-number">0<%= index %></span><span class="menu-word"><%= en %></span><span class="menu-zh"><%= zh %></span><span class="menu-arrow">↗</span></a><% } %>
       </nav></div>

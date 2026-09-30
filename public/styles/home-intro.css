@@ -1,1 +1,11 @@
-/* Independently reversible page refinement. */
+/* Introduce the author before the menu and latest entry. */
+.home-intro{position:absolute;left:3.7%;top:100px;color:#042674;max-width:270px}
+.home-intro h1{font-size:17px;line-height:1.6;margin:0;font-weight:700;letter-spacing:.5px}
+.home-intro p{font-size:12px;line-height:1.8;margin:3px 0 0;letter-spacing:1px}
+@media(max-width:700px){
+  .home-intro{left:6%;top:80px;max-width:88%}
+  .home-intro h1{font-size:15px}
+  .home-intro p{font-size:11px;margin-top:1px}
+  .date-stamp{top:150px}
+  .section-index{top:177px}
+}

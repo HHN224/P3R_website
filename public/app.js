@@ -50,7 +50,25 @@ if(homeStage){
   queueScene();
 }
 const now=new Date();if($('#today'))$('#today').textContent=`${now.getMonth()+1}/${now.getDate()}`;if($('#weekday'))$('#weekday').textContent=now.toLocaleDateString('en',{weekday:'short'}).toUpperCase();
-if(matchMedia('(max-width:700px)').matches && $('.toc')) $('.toc').open=false;
+const articleToc=$('.toc');
+const mobileTocSlot=$('.article-toc-slot');
+if(articleToc&&mobileTocSlot){
+  const desktopAside=articleToc.parentElement;
+  const mobileReading=matchMedia('(max-width:700px)');
+  const syncArticleToc=()=>{
+    if(mobileReading.matches){
+      mobileTocSlot.append(articleToc);
+      articleToc.open=false;
+      desktopAside.hidden=true;
+    }else{
+      desktopAside.prepend(articleToc);
+      articleToc.open=true;
+      desktopAside.hidden=false;
+    }
+  };
+  mobileReading.addEventListener('change',syncArticleToc);
+  syncArticleToc();
+}
 $('#copy-link')?.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(location.href.split('#')[0]);notify('文章链接已复制。');}catch{notify('无法访问剪贴板，请复制浏览器地址栏中的链接。');}});
 const progress=$('#reading-progress');if(progress){
   const ambient=$('.article-ambient');

@@ -1,1 +1,8 @@
-/* Independently reversible page refinement. */
+/* Move the existing contents control below the mobile article heading. */
+.article-toc-slot{display:none}
+@media(max-width:700px){
+  .article-toc-slot{display:block;margin:-12px 0 32px}
+  .article-toc-slot:empty{display:none}
+  .article-toc-slot .toc{padding-bottom:2px}
+  .article-aside{order:3}
+}

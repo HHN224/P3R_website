@@ -6,3 +6,11 @@ qa/
 *.log
 dist/
 .vercel/
+
+# 编辑器与系统临时文件（仅影响 git 是否追踪，不参与构建）
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp

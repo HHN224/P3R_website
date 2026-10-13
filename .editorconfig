@@ -13,3 +13,8 @@ trim_trailing_whitespace = false
 [*.{json,yml,yaml}]
 indent_style = space
 indent_size = 2
+
+# 代码与模板沿用仓库现有的两空格缩进（已核对：全仓库无 Tab 缩进）
+[*.{mjs,js,ejs,css,html}]
+indent_style = space
+indent_size = 2

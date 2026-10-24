@@ -14,3 +14,8 @@ desktop.ini
 .idea/
 .vscode/
 *.swp
+
+# inspiration/ 是从外部导入的独立静态项目，它自带的 dist 要随仓库保留，
+# 因此为它开一个例外（仓库根目录的 dist/ 仍然忽略）。
+!inspiration/dist/
+!inspiration/dist/**
